@@ -5,7 +5,7 @@ const resolvers = {
     Query:{
     me: async (parent, args, context) => {
         if (context.user) {
-          return Profile.findOne({ _id: context.user._id });
+          return User.findOne({ _id: context.user._id });
         }
         throw AuthenticationError;
     
@@ -33,34 +33,30 @@ login: async (parent, {email, password}) => {
    return { token, user };
   },
 
-  saveBook: async (parent, {authors,description,title,bookId,image,link}, context) => {
-    if (context.user){
-       const book= {
-        authors,
-        description,
-        title,
-        bookId,
-        image,
-        link,
-       }
-       const updatedUser = await User.findOneAndUpdate(
+  saveBook: async (parent, { book }, context) => {
+    if (context.user) {
+      const updatedUser = await User.findOneAndUpdate(
         { _id: context.user._id },
         { $addToSet: { savedBooks: book } },
         { new: true, runValidators: true }
-        );  
-        return updatedUser;
+      );
+      return updatedUser;
     }
+    throw AuthenticationError;
+  },
+
+    removeBook: async (parent, { bookId }, context) => {
+        if (context.user) {
+          return User.findOneAndUpdate(
+            { _id: context.user._id },
+            { $pull: { savedBooks: { bookId } } },
+            { new: true }
+          );
+        }
         throw AuthenticationError;
-    }
+      },
+    },
+  };
+  
+  module.exports = resolvers;
 
-
-},
-
-
-
-
-
-
-
-
-    };
