@@ -47,11 +47,12 @@ login: async (parent, {email, password}) => {
 
     removeBook: async (parent, { bookId }, context) => {
         if (context.user) {
-          return User.findOneAndUpdate(
+          const updatedUser = await User.findOneAndUpdate(
             { _id: context.user._id },
             { $pull: { savedBooks: { bookId } } },
             { new: true }
-          );
+          )
+          return updatedUser;
         }
         throw AuthenticationError;
       },
